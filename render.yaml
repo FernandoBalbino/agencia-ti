@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: agencia-ti
+    runtime: node
+    plan: free
+    region: virginia
+    buildCommand: npm ci --omit=dev
+    startCommand: node server/index.ts
+    healthCheckPath: /healthz
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - server/**
+        - shared/**
+        - package.json
+        - package-lock.json
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: CLIENT_ORIGIN
+        value: https://fernandobalbino.github.io

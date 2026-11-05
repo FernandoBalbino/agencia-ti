@@ -1,0 +1,140 @@
+// Catálogo dos clientes. Fica no site e no servidor: pela rede só passam os ids dos cartões.
+// Cartão com `x: true` é pegadinha: o cliente não pediu (vale -5 se for para o quadro).
+// `bonus` entra no quadro quando sai o imprevisto "pedido extra".
+export type Area = 'hw' | 'so' | 'rede' | 'app' | 'seg' | 'atend';
+export const AREAS: Record<Area, string> = {
+  hw: 'Hardware', so: 'Sistema', rede: 'Rede básica', app: 'Aplicativos', seg: 'Segurança', atend: 'Atendimento',
+};
+
+export type CardDef = { id: string; t: string; d: string; a: Area; c: 1 | 2 | 3; deps?: string[]; x?: true };
+export type Client = {
+  id: string; name: string; who: string; nick: string; ask: string; needs: string[];
+  cards: CardDef[]; bonus: CardDef;
+};
+
+export const CLIENTS: Client[] = [
+  {
+    id: 'papelaria', name: 'Papelaria da Dona Rosa', who: 'Dona Rosa, dona da papelaria', nick: 'Dona Rosa',
+    ask: 'Vou abrir a papelaria na segunda. Preciso do computador do caixa funcionando, Wi-Fi com senha, antivírus e uma planilha de estoque.',
+    needs: ['Computador do caixa funcionando', 'Wi-Fi com senha', 'Antivírus', 'Planilha de estoque'],
+    cards: [
+      { id: 'pc', t: 'Ligar e testar o computador do caixa', d: 'Conferir os cabos e ver se o Windows inicia.', a: 'hw', c: 2 },
+      { id: 'conta', t: 'Criar a conta da Dona Rosa no Windows', d: 'Usuário com o nome dela e senha.', a: 'so', c: 1, deps: ['pc'] },
+      { id: 'roteador', t: 'Ligar o roteador Wi-Fi', d: 'Ligar na tomada e no cabo da internet.', a: 'rede', c: 1 },
+      { id: 'senha', t: 'Trocar a senha do Wi-Fi', d: 'Senha forte no lugar da senha de fábrica.', a: 'rede', c: 2, deps: ['roteador'] },
+      { id: 'conectar', t: 'Conectar o PC no Wi-Fi', d: 'Escolher a rede e digitar a senha nova.', a: 'rede', c: 1, deps: ['pc', 'senha'] },
+      { id: 'internet', t: 'Testar a internet', d: 'Abrir um site para conferir.', a: 'rede', c: 1, deps: ['conectar'] },
+      { id: 'antivirus', t: 'Instalar o antivírus', d: 'Baixar, instalar e atualizar.', a: 'seg', c: 2, deps: ['internet'] },
+      { id: 'planilha', t: 'Criar a planilha de estoque', d: 'Colunas de produto, quantidade e preço.', a: 'app', c: 3 },
+      { id: 'ensinar', t: 'Ensinar a Dona Rosa a salvar a planilha', d: 'Mostrar onde fica o arquivo.', a: 'atend', c: 2, deps: ['planilha', 'conta'] },
+      { id: 'jogo', t: 'Instalar um jogo no PC do caixa', d: 'Para passar o tempo no balcão.', a: 'app', c: 2, x: true },
+      { id: 'video', t: 'Trocar a placa de vídeo', d: 'Uma placa nova e mais potente.', a: 'hw', c: 3, x: true },
+      { id: 'papel', t: 'Pôr papel de parede do time', d: 'Fundo de tela do time de futebol.', a: 'so', c: 1, x: true },
+    ],
+    bonus: { id: 'cartaz', t: 'Fazer o cartaz de promoção', d: 'Cartaz de volta às aulas para a vitrine.', a: 'app', c: 2 },
+  },
+  {
+    id: 'joao', name: 'Notebook do Seu João', who: 'Seu João, aposentado', nick: 'Seu João',
+    ask: 'Ganhei um notebook dos meus netos. Quero falar com eles por chamada de vídeo, ler e-mail e guardar as fotos da família.',
+    needs: ['Notebook configurado', 'Chamada de vídeo', 'E-mail', 'Fotos guardadas'],
+    cards: [
+      { id: 'config', t: 'Configurar o notebook pela primeira vez', d: 'Idioma, conta e atualizações.', a: 'so', c: 2 },
+      { id: 'wifi', t: 'Conectar o notebook no Wi-Fi', d: 'Usar a senha que está no roteador.', a: 'rede', c: 1, deps: ['config'] },
+      { id: 'email', t: 'Criar o e-mail do Seu João', d: 'Conta nova com senha forte.', a: 'app', c: 2, deps: ['wifi'] },
+      { id: 'guardar', t: 'Guardar a senha com segurança', d: 'Anotar e guardar com ele, longe do notebook.', a: 'seg', c: 1, deps: ['email'] },
+      { id: 'app', t: 'Instalar o app de chamada de vídeo', d: 'Baixar da loja oficial.', a: 'app', c: 1, deps: ['wifi'] },
+      { id: 'teste', t: 'Fazer uma chamada de teste com o neto', d: 'Conferir câmera e microfone.', a: 'atend', c: 2, deps: ['app'] },
+      { id: 'fotos', t: 'Criar a pasta Fotos da Família', d: 'Copiar as fotos do pen drive.', a: 'so', c: 2, deps: ['config'] },
+      { id: 'atalhos', t: 'Pôr atalhos na área de trabalho', d: 'E-mail, chamada e fotos.', a: 'so', c: 1, deps: ['config'] },
+      { id: 'ensinar', t: 'Ensinar o Seu João a usar tudo', d: 'Abrir o e-mail e fazer a chamada sozinho.', a: 'atend', c: 2, deps: ['email', 'app'] },
+      { id: 'navegadores', t: 'Instalar cinco navegadores', d: 'Para ele escolher o preferido.', a: 'app', c: 2, x: true },
+      { id: 'formatar', t: 'Formatar o notebook novo', d: 'Apagar tudo e instalar de novo.', a: 'so', c: 3, x: true },
+      { id: 'desligar', t: 'Desligar o antivírus', d: 'Para o notebook ficar mais rápido.', a: 'seg', c: 1, x: true },
+    ],
+    bonus: { id: 'letra', t: 'Aumentar o tamanho da letra', d: 'A letra está pequena para ele ler.', a: 'so', c: 1 },
+  },
+  {
+    id: 'salao', name: 'Salão da Kelly', who: 'Kelly, dona do salão de beleza', nick: 'Kelly',
+    ask: 'Quero a agenda das clientes no computador, Wi-Fi com senha para as clientes e um cartaz com os preços.',
+    needs: ['Agenda das clientes', 'Wi-Fi com senha', 'Cartaz de preços'],
+    cards: [
+      { id: 'atualizar', t: 'Ligar e atualizar o Windows', d: 'Instalar as atualizações pendentes.', a: 'so', c: 2 },
+      { id: 'agenda', t: 'Criar a planilha da agenda', d: 'Dia, horário, cliente e serviço.', a: 'app', c: 3 },
+      { id: 'soma', t: 'Somar os valores do dia na planilha', d: 'Fórmula de soma no fim da coluna.', a: 'app', c: 2, deps: ['agenda'] },
+      { id: 'roteador', t: 'Ligar o roteador', d: 'Ligar na tomada e no cabo da internet.', a: 'rede', c: 1 },
+      { id: 'senha', t: 'Trocar o nome e a senha do Wi-Fi', d: 'Rede "Salao Kelly" com senha forte.', a: 'rede', c: 2, deps: ['roteador'] },
+      { id: 'cartaz', t: 'Fazer o cartaz de preços', d: 'Serviços e valores, bem legíveis.', a: 'app', c: 2 },
+      { id: 'pdf', t: 'Salvar o cartaz em PDF', d: 'Para mandar no celular das clientes.', a: 'app', c: 1, deps: ['cartaz'] },
+      { id: 'copia', t: 'Copiar a agenda para um pen drive', d: 'Cópia de segurança.', a: 'so', c: 1, deps: ['agenda'] },
+      { id: 'ensinar', t: 'Ensinar a Kelly a marcar um horário', d: 'Preencher uma linha da agenda.', a: 'atend', c: 2, deps: ['agenda', 'atualizar'] },
+      { id: 'editor', t: 'Instalar editor de vídeo profissional', d: 'Programa pesado de cinema.', a: 'app', c: 3, x: true },
+      { id: 'processador', t: 'Trocar o processador', d: 'Um processador mais rápido.', a: 'hw', c: 3, x: true },
+      { id: 'semsenha', t: 'Deixar o Wi-Fi sem senha', d: 'Para as clientes entrarem mais fácil.', a: 'rede', c: 1, x: true },
+    ],
+    bonus: { id: 'logo', t: 'Pôr o logo do salão no cartaz', d: 'A Kelly mandou o logo por e-mail.', a: 'app', c: 1 },
+  },
+  {
+    id: 'leitura', name: 'Sala de Leitura da Escola', who: 'Coordenação da escola', nick: 'A coordenação',
+    ask: 'A sala de leitura ganhou dois computadores. Os alunos vão pesquisar na internet e fazer trabalhos no editor de texto, com segurança.',
+    needs: ['Dois PCs montados', 'Internet funcionando', 'Editor de texto', 'Conta Aluno segura'],
+    cards: [
+      { id: 'montar', t: 'Montar os dois computadores', d: 'Monitor, teclado, mouse e cabos.', a: 'hw', c: 2 },
+      { id: 'ligar', t: 'Ligar e testar os dois PCs', d: 'Ver se tudo liga e o Windows inicia.', a: 'hw', c: 1, deps: ['montar'] },
+      { id: 'aluno', t: 'Criar a conta Aluno sem administrador', d: 'Aluno não pode instalar programas.', a: 'so', c: 2, deps: ['ligar'] },
+      { id: 'cabo', t: 'Ligar os PCs no roteador com cabo', d: 'Cabo de rede em cada PC.', a: 'rede', c: 1, deps: ['ligar'] },
+      { id: 'internet', t: 'Testar a internet nos dois PCs', d: 'Abrir um site de pesquisa.', a: 'rede', c: 1, deps: ['cabo'] },
+      { id: 'editor', t: 'Instalar o editor de texto', d: 'Nos dois computadores.', a: 'app', c: 1, deps: ['internet'] },
+      { id: 'antivirus', t: 'Instalar o antivírus', d: 'Baixar, instalar e atualizar.', a: 'seg', c: 2, deps: ['internet'] },
+      { id: 'atalhos', t: 'Pôr os atalhos na área de trabalho', d: 'Editor de texto e navegador.', a: 'so', c: 1, deps: ['editor'] },
+      { id: 'regras', t: 'Fazer o cartaz de regras da sala', d: 'Como usar os PCs com cuidado.', a: 'app', c: 2 },
+      { id: 'jogos', t: 'Instalar jogos para o intervalo', d: 'Três jogos em cada PC.', a: 'app', c: 2, x: true },
+      { id: 'admin', t: 'Dar senha de administrador aos alunos', d: 'Para eles instalarem o que quiserem.', a: 'seg', c: 1, x: true },
+      { id: 'tvs', t: 'Trocar os monitores por TVs', d: 'Telas maiores para a sala.', a: 'hw', c: 3, x: true },
+    ],
+    bonus: { id: 'pasta', t: 'Criar a pasta Trabalhos em cada PC', d: 'Para os alunos salvarem os arquivos.', a: 'so', c: 1 },
+  },
+  {
+    id: 'lanchonete', name: 'Lanchonete do Beto', who: 'Beto, dono da lanchonete', nick: 'Beto',
+    ask: 'Quero vender por delivery: preciso do computador do balcão rápido, cardápio digital e uma planilha para anotar os pedidos.',
+    needs: ['Computador rápido', 'Cardápio digital', 'Planilha de pedidos'],
+    cards: [
+      { id: 'limpar', t: 'Limpar e ligar o PC do balcão', d: 'Tirar a poeira e conferir os cabos.', a: 'hw', c: 2 },
+      { id: 'lento', t: 'Desinstalar programas que não usa', d: 'Deixar o computador mais leve.', a: 'so', c: 2, deps: ['limpar'] },
+      { id: 'roteador', t: 'Reiniciar o roteador', d: 'Desligar, esperar e ligar de novo.', a: 'rede', c: 1 },
+      { id: 'conectar', t: 'Conectar o PC no Wi-Fi', d: 'Escolher a rede da lanchonete.', a: 'rede', c: 1, deps: ['limpar', 'roteador'] },
+      { id: 'cardapio', t: 'Montar o cardápio digital', d: 'Fotos, lanches e preços.', a: 'app', c: 3 },
+      { id: 'pdf', t: 'Salvar o cardápio em PDF', d: 'Para mandar pelo celular.', a: 'app', c: 1, deps: ['cardapio'] },
+      { id: 'pedidos', t: 'Criar a planilha de pedidos', d: 'Cliente, lanche, valor e endereço.', a: 'app', c: 2 },
+      { id: 'total', t: 'Pôr o total do dia na planilha', d: 'Fórmula de soma dos valores.', a: 'app', c: 1, deps: ['pedidos'] },
+      { id: 'ensinar', t: 'Ensinar o Beto a mandar o cardápio', d: 'Anexar o PDF numa mensagem.', a: 'atend', c: 2, deps: ['pdf', 'conectar'] },
+      { id: 'gamer', t: 'Comprar um computador gamer', d: 'O mais caro da loja.', a: 'hw', c: 3, x: true },
+      { id: 'tres', t: 'Instalar três antivírus juntos', d: 'Para ficar três vezes mais seguro.', a: 'seg', c: 2, x: true },
+      { id: 'teclado', t: 'Trocar o teclado por um colorido', d: 'Teclado com luzes de LED.', a: 'hw', c: 1, x: true },
+    ],
+    bonus: { id: 'backup', t: 'Fazer cópia de segurança da planilha', d: 'Salvar também na nuvem.', a: 'so', c: 1 },
+  },
+  {
+    id: 'ong', name: 'ONG Patinhas', who: 'Voluntária da ONG de adoção de animais', nick: 'A voluntária',
+    ask: 'Queremos divulgar os bichinhos para adoção e organizar o cadastro de quem adota, protegendo os dados das pessoas.',
+    needs: ['Apresentação dos animais', 'Cadastro dos adotantes', 'Dados protegidos'],
+    cards: [
+      { id: 'atualizar', t: 'Ligar e atualizar o computador', d: 'Instalar as atualizações pendentes.', a: 'so', c: 2 },
+      { id: 'wifi', t: 'Conectar no Wi-Fi da ONG', d: 'Escolher a rede e digitar a senha.', a: 'rede', c: 1, deps: ['atualizar'] },
+      { id: 'pastas', t: 'Organizar as fotos em pastas', d: 'Uma pasta para cada animal.', a: 'so', c: 2, deps: ['atualizar'] },
+      { id: 'cadastro', t: 'Criar a planilha de adotantes', d: 'Nome, telefone, cidade e animal.', a: 'app', c: 2 },
+      { id: 'filtro', t: 'Pôr filtro por cidade na planilha', d: 'Para achar os adotantes rápido.', a: 'app', c: 1, deps: ['cadastro'] },
+      { id: 'slides', t: 'Fazer a apresentação dos animais', d: 'Uma foto e um texto por animal.', a: 'app', c: 3, deps: ['pastas'] },
+      { id: 'senha', t: 'Pôr senha forte no e-mail da ONG', d: 'Trocar a senha antiga e fraca.', a: 'seg', c: 1, deps: ['wifi'] },
+      { id: 'proteger', t: 'Proteger a planilha com senha', d: 'Os dados das pessoas são pessoais (LGPD).', a: 'seg', c: 2, deps: ['cadastro'] },
+      { id: 'ensinar', t: 'Ensinar a voluntária a atualizar a planilha', d: 'Cadastrar um adotante novo.', a: 'atend', c: 2, deps: ['filtro'] },
+      { id: 'postar', t: 'Postar a planilha de adotantes nas redes', d: 'Para todo mundo ver quem adotou.', a: 'seg', c: 1, x: true },
+      { id: 'pirata', t: 'Instalar programa pirata de edição', d: 'Baixado de um site qualquer.', a: 'app', c: 2, x: true },
+      { id: 'gabinete', t: 'Trocar o gabinete por um com LED', d: 'Para o computador ficar bonito.', a: 'hw', c: 2, x: true },
+    ],
+    bonus: { id: 'feira', t: 'Fazer o cartaz da feira de adoção', d: 'Data, local e foto de um bichinho.', a: 'app', c: 2 },
+  },
+];
+
+export const clientById = (id: string): Client => CLIENTS.find((c) => c.id === id) ?? CLIENTS[0];
+export const allCards = (c: Client): CardDef[] => [...c.cards, c.bonus];
+export const cardOf = (c: Client, id: string): CardDef | undefined => allCards(c).find((x) => x.id === id);

@@ -1,0 +1,97 @@
+/* Aula: tudo em "em" (1em = 1% da largura do slide), para caber igual no projetor e no Chromebook. */
+.deck { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); overflow: hidden; }
+.slide {
+  position: relative; width: min(100vw, 177.78vh); height: min(56.25vw, 100vh); font-size: calc(min(100vw, 177.78vh) / 100);
+  padding: 5em 6.5em 6em; display: flex; flex-direction: column; justify-content: center; gap: 2.6em; color: var(--ink);
+}
+.slide b { color: var(--ink); font-weight: 700; }
+.slide svg { width: 1em; height: 1em; flex-shrink: 0; }
+
+.anim-up, .anim-pop, .anim-left, .anim-right, .anim-flip { animation-duration: 0.7s; animation-timing-function: var(--ease); animation-fill-mode: both; animation-delay: calc(var(--d, 0) * 110ms + 120ms); }
+.anim-up { animation-name: sl-up; } .anim-pop { animation-name: sl-pop; } .anim-left { animation-name: sl-left; }
+.anim-right { animation-name: sl-right; } .anim-flip { animation-name: sl-flip; }
+@keyframes sl-up { from { opacity: 0; transform: translateY(1.6em); } }
+@keyframes sl-pop { from { opacity: 0; transform: scale(0.85); } }
+@keyframes sl-left { from { opacity: 0; transform: translateX(-3em); } }
+@keyframes sl-right { from { opacity: 0; transform: translateX(3em); } }
+@keyframes sl-flip { from { opacity: 0; transform: perspective(60em) rotateX(70deg); } }
+
+.sl-center { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.6em; }
+.sl-kicker { font-size: 1.8em; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+.sl-h1 { font-size: 8.6em; font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; }
+.sl-h2 { font-size: 5em; font-weight: 700; letter-spacing: -0.03em; }
+.sl-sub { font-size: 2.6em; color: var(--ink-2); max-width: 36ch; }
+.sl-big { font-size: 2.8em; line-height: 1.35; color: var(--ink-2); text-align: center; }
+.sl-foot { font-size: 2.6em; font-weight: 600; color: var(--blue); text-align: center; }
+.sl-note { display: flex; align-items: center; gap: 0.5em; font-size: 2em; color: var(--ink-2); }
+.sl-good { display: inline-flex; align-items: center; gap: 0.4em; color: var(--green); font-size: 0.85em; }
+.logo.big { font-size: 7em; gap: 0.4em; }
+.logo.big svg { width: 1.3em; height: 1.3em; }
+
+.sl-cards { display: grid; gap: 2em; }
+.sl-cards.four { grid-template-columns: repeat(4, 1fr); }
+.sl-card { display: flex; flex-direction: column; gap: 0.8em; padding: 2.6em 2.2em; border-radius: 1.6em; background: var(--surface); border: 0.1em solid var(--line); box-shadow: var(--shadow); }
+.sl-card b { font-size: 3em; font-weight: 700; letter-spacing: -0.02em; }
+.sl-card span:not(.sl-ic) { font-size: 2em; color: var(--ink-2); line-height: 1.3; }
+.sl-ic { width: 2.6em; height: 2.6em; font-size: 2.2em; border-radius: 0.7em; display: grid; place-items: center; background: var(--blue-soft); color: var(--blue); }
+.sl-ic svg { width: 1.3em; height: 1.3em; }
+.sl-card.warn .sl-ic { background: var(--amber-soft); color: var(--amber); }
+
+.sl-two { display: grid; grid-template-columns: 1fr 1fr; gap: 3em 4em; align-items: center; }
+.sl-col { padding: 2.8em; border-radius: 1.8em; background: var(--surface); border: 0.12em solid var(--line); display: flex; flex-direction: column; gap: 1.4em; height: 100%; }
+.sl-col h3 { display: flex; align-items: center; gap: 0.5em; font-size: 3.4em; }
+.sl-col li { font-size: 2.4em; padding: 0.4em 0; border-top: 0.04em solid var(--line); color: var(--ink-2); }
+.sl-col.good h3 { color: var(--green); }
+.sl-col.bad h3 { color: var(--red); }
+.sl-col.bad li { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--red) 60%, transparent); }
+
+.sl-flow { display: grid; grid-template-columns: 1fr auto 1.2fr; align-items: center; gap: 3em; }
+.sl-big-task { font-size: 3.6em; font-weight: 700; padding: 1.2em; border-radius: 0.6em; background: var(--blue); color: #fff; text-align: center; box-shadow: var(--shadow-lg); }
+.sl-arrow { font-size: 6em; color: var(--ink-3); }
+.sl-steps { display: flex; flex-direction: column; gap: 1em; }
+.sl-steps li { display: flex; align-items: center; gap: 0.8em; font-size: 2.6em; padding: 0.55em 0.8em; border-radius: 0.5em; background: var(--surface); border: 0.05em solid var(--line); box-shadow: var(--shadow); }
+.sl-steps b { display: grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 0.5em; background: var(--blue-soft); color: var(--blue); font-size: 0.85em; }
+
+.sl-kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2em; }
+.sl-kcol { display: flex; flex-direction: column; gap: 1em; padding: 1.6em; border-radius: 1.4em; background: #eceff5; }
+.sl-kcol > b { font-size: 2.4em; }
+.sl-kcard { font-size: 2.2em; padding: 0.8em 0.9em; border-radius: 0.5em; background: var(--surface); box-shadow: var(--shadow); }
+.sl-kcard.done { color: var(--ink-3); text-decoration: line-through; }
+.sl-chips { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; }
+.sl-chip { font-size: 2em; font-weight: 600; padding: 0.4em 0.9em; border-radius: 999px; background: var(--surface); border: 0.06em solid var(--line-2); }
+
+.sl-chain { display: flex; align-items: center; justify-content: center; gap: 0; }
+.sl-link { display: flex; align-items: center; }
+.sl-lock { display: grid; place-items: center; width: 2.4em; height: 2.4em; margin: 0 0.6em; font-size: 2.2em; border-radius: 50%; background: var(--surface); border: 0.08em solid var(--line-2); color: var(--ink-3); }
+.sl-node { font-size: 2.6em; font-weight: 600; padding: 0.9em 1em; border-radius: 0.6em; background: var(--surface-2); border: 0.06em solid var(--line-2); color: var(--ink-2); }
+.sl-node.ok { background: var(--green-soft); border-color: transparent; color: var(--green); }
+
+.sl-check { display: flex; flex-direction: column; gap: 1.1em; margin-top: 1.6em; }
+.sl-check li { display: flex; align-items: center; gap: 0.7em; font-size: 2.5em; padding: 0.5em 0.8em; border-radius: 0.5em; background: var(--surface); border: 0.04em solid var(--line); }
+.sl-check li > svg { color: var(--blue); }
+.sl-calc { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6em 0.8em; padding: 3em; border-radius: 1.8em; background: var(--surface); border: 0.12em solid var(--line); box-shadow: var(--shadow-lg); font-size: 1em; }
+.sl-calc span, .sl-calc b, .sl-calc strong { display: inline-flex; align-items: center; gap: 0.2em; font-size: 3.4em; }
+.sl-calc b { color: var(--ink-3); }
+.sl-calc strong { color: var(--amber); }
+.sl-calc svg { color: var(--amber-2); }
+.sl-calc p { flex-basis: 100%; text-align: center; font-size: 2.1em; color: var(--ink-2); margin-top: 0.6em; }
+.sl-tools { padding: 3em; border-radius: 1.8em; background: var(--surface); border: 0.12em solid var(--line); display: flex; flex-direction: column; gap: 1.2em; }
+.sl-tools h3 { display: flex; align-items: center; gap: 0.4em; font-size: 3.2em; }
+.sl-tools p { font-size: 2.3em; color: var(--ink-2); line-height: 1.4; }
+
+.sl-score { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2em; }
+.sl-pt { display: flex; flex-direction: column; gap: 0.6em; padding: 2.6em 2em; border-radius: 1.6em; background: var(--surface); border: 0.1em solid var(--line); box-shadow: var(--shadow); }
+.sl-pt b { font-size: 7em; line-height: 1; letter-spacing: -0.04em; color: var(--green); }
+.sl-pt.neg b { color: var(--red); }
+.sl-pt span { font-size: 2.2em; color: var(--ink-2); }
+
+.sl-video { width: 100%; height: 100%; display: grid; place-items: center; }
+.sl-video video { max-width: 100%; max-height: 100%; border-radius: 1.4em; box-shadow: var(--shadow-lg); background: #000; }
+
+.sl-nav { position: fixed; right: 18px; top: 14px; display: flex; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.2s; z-index: 5; }
+.sl-nav:hover { opacity: 1; }
+.sl-nav button { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.sl-nav button:disabled { opacity: 0.3; }
+.sl-dots { display: flex; gap: 6px; padding: 0 6px; }
+.sl-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); cursor: pointer; opacity: 0.4; }
+.sl-dots i.on { background: var(--blue); opacity: 1; transform: scale(1.3); }
