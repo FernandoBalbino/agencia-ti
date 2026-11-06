@@ -217,9 +217,21 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .card.blocked { border-color: #f2d28d; background: #fffaf0; }
 .card.mine { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft), var(--shadow); }
 .card.helpme { border-color: #f2d28d; }
-.card.col-done { background: var(--surface); box-shadow: none; border-color: var(--line); }
-.card.col-done h3 { color: var(--ink-2); }
-.card.col-done .bar i { background: var(--green); }
+.card.in-done { background: var(--surface); box-shadow: none; border-color: var(--line); }
+.card.in-done h3 { color: var(--ink-2); }
+.card.in-done .bar i { background: var(--green); }
+
+/* mover cartão: arrastar ou clicar no cartão e depois na coluna */
+.card { cursor: pointer; }
+.card[draggable='true'] { cursor: grab; }
+.card[draggable='true']:active { cursor: grabbing; }
+.card.sel { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-soft), var(--shadow-lg); transform: translateY(-2px); }
+.col.armed, .side-bank.armed { cursor: pointer; outline: 2px dashed color-mix(in srgb, var(--blue) 50%, transparent); outline-offset: -3px; }
+.col.armed:hover, .col.over { background: var(--blue-soft); }
+.side-bank.armed:hover, .side-bank.over { background: var(--blue-soft); border-radius: 14px; }
+.side-bank { transition: background 0.15s; border-radius: 14px; padding: 6px 0; }
+.bank-row[draggable='true'] { cursor: grab; }
+.tip.pick { color: var(--blue); font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 /* ---------- professor: sala ---------- */
 .prof { min-height: 100%; padding: 18px 24px 28px; display: flex; flex-direction: column; gap: 18px; }

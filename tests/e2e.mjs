@@ -76,18 +76,25 @@ await sleep(800);
 await shot(ana, '07-aluno-planejamento');
 await shot(prof, '08-telao-planejamento');
 
-// Ana leva um cartão do banco e devolve
-const first = ana.locator('.bank-row').first();
-if (await first.count()) await first.click();
+// Ana arrasta um cartão do banco para "A fazer"
+const before = await ana.locator('.col-todo .card').count();
+await ana.locator('.bank-row').first().dragTo(ana.locator('section.col-todo'));
 await sleep(500);
+if ((await ana.locator('.col-todo .card').count()) <= before) throw new Error('arrastar do banco não funcionou');
 
 // ---- dia 1 ----
 await prof.click('button:has-text("Começar o dia 1")', { timeout: 3000 }).catch(() => {});
 await sleep(2800);
 await shot(ana, '09-aluno-dia-1');
-// Ana pega um cartão liberado e gasta energia
-const take = ana.locator('.col-todo button:has-text("Pegar")').first();
-if (await take.count()) { await take.click(); await sleep(400); }
+// Ana clica num cartão liberado e depois na coluna "Fazendo" (sem arrastar)
+const free = ana.locator('.col-todo .card:not(.locked):not(.blocked)').first();
+if (await free.count()) {
+  await free.click({ position: { x: 30, y: 60 } });
+  await shot(ana, '09b-aluno-escolheu-cartao');
+  await ana.click('section.col-doing h2');
+  await sleep(500);
+  if (!(await ana.locator('.card.mine').count())) throw new Error('clicar e escolher a coluna não funcionou');
+}
 const spend = ana.locator('.card.mine button:has-text("Gastar")');
 if (await spend.count()) { await spend.click(); await sleep(400); }
 await shot(ana, '10-aluno-gastou-energia');

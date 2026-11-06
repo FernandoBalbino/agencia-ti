@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { DragEvent, KeyboardEvent, MouseEvent } from 'react';
 import { Clock, Hand, Lock, Maximize, PackageCheck, Pause, Plus, Undo2, Zap } from 'lucide-react';
 import { call } from './net.ts';
 import type { St } from './net.ts';
@@ -100,6 +101,7 @@ function StudentResults({ v }: { v: St }) {
 }
 
 // ---------- quadro da equipe ----------
+type Ev = 'add' | 'remove' | 'take' | 'spend' | 'drop';
 type Row = { id: string; col: Col; spent: number; owner: string | null; blocked: boolean; def: CardDef };
 const COLS: [Col, string][] = [['todo', 'A fazer'], ['doing', 'Fazendo'], ['done', 'Pronto']];
 
@@ -123,7 +125,7 @@ function Board({ v }: { v: St }) {
   const day = room.phase === 'day';
   const frozen = room.paused || !!team.delivered;
 
-  const act = async (ev: 'add' | 'remove' | 'take' | 'spend', id: string) => {
+  const act = async (ev: Ev, id: string) => {
     if (frozen) return toast(room.paused ? 'O jogo está pausado' : 'Pedido entregue: aguarde as outras equipes');
     if (ev === 'spend' && myE <= 0) { sfx.no(); return toast(meM?.absent ? 'Você faltou hoje: ajude a equipe conversando' : 'Sua energia acabou hoje. Ajude a equipe a planejar!', 'bad'); }
     const r = await call(ev, { id });
@@ -131,6 +133,44 @@ function Board({ v }: { v: St }) {
     if (ev === 'spend') (r.done ? sfx.done : sfx.zap)(); else sfx.tap();
   };
   const help = async () => { const r = await call('help'); if (!r.ok) toast(r.err ?? 'Não deu', 'bad'); else { sfx.tap(); toast(r.help ? 'Pedido de ajuda enviado para a equipe' : 'Pedido de ajuda cancelado'); } };
+
+  // mover cartão: arrastar, ou clicar no cartão e depois na coluna (para quem tem dificuldade em arrastar)
+  const [sel, setSel] = useState<string | null>(null);
+  const [over, setOver] = useState<Col | null>(null);
+  const selRow = rows.find((r) => r.id === sel) ?? null;
+  useEffect(() => {
+    const f = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') setSel(null); };
+    addEventListener('keydown', f);
+    return () => removeEventListener('keydown', f);
+  }, []);
+  const moveTo = async (id: string, to: Col) => {
+    setSel(null); setOver(null);
+    const r = rows.find((x) => x.id === id);
+    if (!r || r.col === to) return;
+    const from = r.col;
+    if (from === 'bank' && to === 'todo') return act('add', id);
+    if (from === 'todo' && to === 'bank') return act('remove', id);
+    if (from === 'todo' && to === 'doing') return act('take', id);
+    if (from === 'bank' && to === 'doing') { await act('add', id); if (day) await act('take', id); return; }
+    if (from === 'doing' && to === 'todo') return act('drop', id);
+    if (from === 'doing' && to === 'bank') { sfx.no(); return toast('Primeiro devolva o cartão para A fazer', 'bad'); }
+    sfx.no();
+    if (to === 'done') return toast(from === 'doing' ? 'Gaste energia: o cartão vai para Pronto quando a barra enche' : 'Primeiro leve o cartão para Fazendo e gaste energia', 'bad');
+    return toast('Cartão pronto fica em Pronto', 'bad');
+  };
+  const pick = (r: Row, e: MouseEvent | KeyboardEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (selRow && selRow.id !== r.id && selRow.col !== r.col) return moveTo(selRow.id, r.col); // clicou num cartão de outra coluna
+    setSel((x) => (x === r.id ? null : r.id)); sfx.tap();
+  };
+  const zone = (c: Col) => ({
+    onDragOver: (e: DragEvent) => { e.preventDefault(); if (over !== c) setOver(c); },
+    onDragLeave: (e: DragEvent) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setOver(null); },
+    onDrop: (e: DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) void moveTo(id, c); },
+    onClick: (e: MouseEvent) => { if (selRow && !(e.target as HTMLElement).closest('button, .card')) void moveTo(selRow.id, c); },
+  });
+  const drag = (id: string) => (e: DragEvent) => { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; setSel(null); };
+  const armed = (c: Col) => (selRow && selRow.col !== c ? 'armed' : '');
 
   const tip = room.paused ? 'Jogo pausado pelo professor.'
     : team.delivered ? `Pedido entregue no dia ${team.delivered.day}! Aguardem as outras equipes.`
@@ -163,13 +203,13 @@ function Board({ v }: { v: St }) {
             ))}
           </ul>
         </section>
-        <section className="side-bank">
+        <section className={`side-bank ${armed('bank')} ${over === 'bank' ? 'over' : ''}`} {...zone('bank')}>
           <h3>Banco de cartões <span className="count">{bank.length}</span></h3>
-          <p className="muted small">Leve para A fazer só o que o cliente pediu. Cartão fora do pedido tira 5 pontos.</p>
+          <p className="muted small">Clique no + ou arraste para A fazer só o que o cliente pediu. Cartão fora do pedido tira 5 pontos.</p>
           <ul className="bank">
             {bank.map((r) => (
               <li key={r.id}>
-                <button className="bank-row" onClick={() => act('add', r.id)} disabled={frozen}>
+                <button className="bank-row" onClick={() => act('add', r.id)} disabled={frozen} draggable={!frozen} onDragStart={drag(r.id)}>
                   <span className={`dot a-${r.def.a}`} aria-hidden />
                   <span className="bank-t">{r.def.t}</span>
                   <span className="bank-c"><Zap size={12} />{r.def.c}</span>
@@ -200,7 +240,9 @@ function Board({ v }: { v: St }) {
             <span><b>{done}</b> de {total} cartões do pedido prontos</span>
             <div className="bar"><i style={{ transform: `scaleX(${total ? done / total : 0})` }} /></div>
           </div>
-          <p className={`tip ${room.phase}`}>{tip}</p>
+          {selRow ? (
+            <p className="tip pick">Agora clique na coluna para onde quer levar “{selRow.def.t}” <button className="btn sm ghost" onClick={() => setSel(null)}>Cancelar</button></p>
+          ) : <p className={`tip ${room.phase}`}>{tip}</p>}
           {day && mine && !frozen && (
             <button className={`btn ${meM?.help ? 'warn' : 'primary'}`} onClick={help}><Hand size={17} /> {meM?.help ? 'Ajuda pedida' : 'Pedir ajuda'}</button>
           )}
@@ -213,14 +255,14 @@ function Board({ v }: { v: St }) {
             const list = order(c);
             const n = c === 'done' ? list.filter((r) => !r.def.x).length : list.length;
             return (
-              <section key={c} className={`col col-${c}`} aria-label={label}>
+              <section key={c} className={`col col-${c} ${armed(c)} ${over === c ? 'over' : ''}`} aria-label={label} {...zone(c)}>
                 <h2>{label} <span className="count">{n}</span></h2>
                 <div className="col-list">
                   {list.map((r) => (
                     <Card key={r.id} r={r} me={me} day={day} myE={myE} open={isOpen(r.def, cells)} bonus={r.id === client.bonus.id}
                       ownerName={nameOf(r.owner)} ownerHelp={!!team.members.find((m) => m.id === r.owner)?.help}
                       depTitle={(r.def.deps ?? []).map((d) => cardOf(client, d)).find((d) => d && cells[d.id]?.col !== 'done')?.t ?? ''}
-                      onAct={act} />
+                      onAct={act} sel={sel === r.id} canDrag={!frozen && r.col !== 'done'} onDrag={drag(r.id)} onPick={(e) => pick(r, e)} />
                   ))}
                   {c === 'todo' && need.length === 0 && <p className="empty">Leve os cartões do banco para cá.</p>}
                 </div>
@@ -233,12 +275,12 @@ function Board({ v }: { v: St }) {
   );
 }
 
-function Card({ r, me, day, myE, open, bonus, ownerName, ownerHelp, depTitle, onAct }: {
+function Card({ r, me, day, myE, open, bonus, ownerName, ownerHelp, depTitle, onAct, sel, canDrag, onDrag, onPick }: {
   r: Row; me: string; day: boolean; myE: number; open: boolean; bonus: boolean; ownerName: string; ownerHelp: boolean; depTitle: string;
-  onAct: (ev: 'add' | 'remove' | 'take' | 'spend', id: string) => void;
+  onAct: (ev: Ev, id: string) => void; sel: boolean; canDrag: boolean; onDrag: (e: DragEvent) => void; onPick: (e: MouseEvent | KeyboardEvent) => void;
 }) {
   const locked = r.col !== 'done' && !open;
-  const cls = ['card', `col-${r.col}`, locked && 'locked', r.blocked && 'blocked', r.owner === me && r.col === 'doing' && 'mine', ownerHelp && r.col === 'doing' && 'helpme'].filter(Boolean).join(' ');
+  const cls = ['card', `in-${r.col}`, locked && 'locked', r.blocked && 'blocked', r.owner === me && r.col === 'doing' && 'mine', ownerHelp && r.col === 'doing' && 'helpme', sel && 'sel'].filter(Boolean).join(' ');
   let foot = null;
   if (r.col === 'done') foot = <span className="st ok"><Done /> Pronto</span>;
   else if (locked) foot = <span className="st lock"><Lock size={14} /> Depois de: {depTitle}</span>;
@@ -250,7 +292,9 @@ function Card({ r, me, day, myE, open, bonus, ownerName, ownerHelp, depTitle, on
       : <button className={`btn sm ${myE <= 0 ? 'soft' : ''}`} onClick={() => onAct('spend', r.id)}><Zap size={15} /> Ajudar</button>;
   }
   return (
-    <article className={cls}>
+    <article className={cls} draggable={canDrag} onDragStart={onDrag} onClick={onPick} tabIndex={0} aria-pressed={sel}
+      aria-label={`${r.def.t}. Clique para escolher e depois clique na coluna, ou arraste.`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(e); } }}>
       <div className="card-top">
         <span className={`tag a-${r.def.a}`}>{AREAS[r.def.a]}</span>
         {bonus && <span className="tag new">Pedido extra</span>}

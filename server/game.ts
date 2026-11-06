@@ -419,6 +419,18 @@ export class Room {
     if (done) this.checkDelivered(t);
     return { done };
   }
+  /** devolve um cartão de "Fazendo" para "A fazer" (a energia gasta fica); o dono ou, se ele saiu/faltou, um colega */
+  drop(p: P, id: string) {
+    if (!this.live()) fail('A rodada não começou');
+    this.working();
+    const t = this.teamOf(p), { c } = this.cell(t, id);
+    if (c.col !== 'doing') fail('Esse cartão não está em Fazendo');
+    const owner = c.owner ? this.players.get(c.owner) : null;
+    if (c.owner !== p.id && owner?.sid && !t.absent.has(owner.id)) fail(`Esse cartão é de ${owner.name}. Peça para ${owner.name} devolver ou ajude com energia.`);
+    if (owner) owner.help = false;
+    c.col = 'todo'; c.owner = null;
+    this.touchTeam(t.id);
+  }
   help(p: P) {
     const t = this.teamOf(p);
     const mine = [...t.cells].find(([, x]) => x.col === 'doing' && x.owner === p.id);

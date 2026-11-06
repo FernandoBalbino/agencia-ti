@@ -101,6 +101,7 @@ io.on('connection', (socket) => {
   on('remove', (a) => { const { r, p } = player(); r.remove(p, str(a.id)); });
   on('take', (a) => { const { r, p } = player(); r.take(p, str(a.id)); });
   on('spend', (a) => { const { r, p } = player(); return r.spend(p, str(a.id)); });
+  on('drop', (a) => { const { r, p } = player(); r.drop(p, str(a.id)); });
   on('help', () => { const { r, p } = player(); return r.help(p); });
   on('fs', (a) => { const { r, p } = player(); r.setFs(p, a.on === true); });
 
