@@ -167,7 +167,7 @@ function Board({ v }: { v: St }) {
     onDragOver: (e: DragEvent) => { e.preventDefault(); if (over !== c) setOver(c); },
     onDragLeave: (e: DragEvent) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setOver(null); },
     onDrop: (e: DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) void moveTo(id, c); },
-    onClick: (e: MouseEvent) => { if (selRow && !(e.target as HTMLElement).closest('button, .card')) void moveTo(selRow.id, c); },
+    onClick: (e: MouseEvent) => { if (selRow && !(e.target as HTMLElement).closest('button, .card, .bank-row')) void moveTo(selRow.id, c); },
   });
   const drag = (id: string) => (e: DragEvent) => { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; setSel(null); };
   const armed = (c: Col) => (selRow && selRow.col !== c ? 'armed' : '');
@@ -205,16 +205,18 @@ function Board({ v }: { v: St }) {
         </section>
         <section className={`side-bank ${armed('bank')} ${over === 'bank' ? 'over' : ''}`} {...zone('bank')}>
           <h3>Banco de cartões <span className="count">{bank.length}</span></h3>
-          <p className="muted small">Clique no + ou arraste para A fazer só o que o cliente pediu. Cartão fora do pedido tira 5 pontos.</p>
+          <p className="muted small">Leve para A fazer só o que o cliente pediu: clique no +, arraste, ou clique no cartão e depois na coluna. Cartão fora do pedido tira 5 pontos.</p>
           <ul className="bank">
             {bank.map((r) => (
               <li key={r.id}>
-                <button className="bank-row" onClick={() => act('add', r.id)} disabled={frozen} draggable={!frozen} onDragStart={drag(r.id)}>
+                <div role="button" tabIndex={0} aria-pressed={sel === r.id} className={`bank-row ${sel === r.id ? 'sel' : ''}`}
+                  draggable={!frozen} onDragStart={drag(r.id)} onClick={(e) => pick(r, e)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(r, e); } }}>
                   <span className={`dot a-${r.def.a}`} aria-hidden />
                   <span className="bank-t">{r.def.t}</span>
                   <span className="bank-c"><Zap size={12} />{r.def.c}</span>
-                  <Plus size={16} className="bank-plus" />
-                </button>
+                  <button className="icon-btn bank-plus" title="Levar para A fazer" aria-label={`Levar ${r.def.t} para A fazer`} onClick={() => act('add', r.id)}><Plus size={16} /></button>
+                </div>
               </li>
             ))}
           </ul>

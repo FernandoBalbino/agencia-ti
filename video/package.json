@@ -31,7 +31,9 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "render": "remotion render AgenciaTI ../public/video/agencia-ti.mp4 --codec=h264 --crf=26",
-    "poster": "remotion still AgenciaTI ../public/video/poster.jpg --frame=60"
+    "poster": "remotion still AgenciaTI ../public/video/poster.jpg --frame=60",
+    "voice": "node --env-file-if-exists=../.env.local scripts/voice.mts",
+    "timeline": "node scripts/timeline.mts"
   },
   "allowScripts": {
     "esbuild": false

@@ -81,6 +81,12 @@ const before = await ana.locator('.col-todo .card').count();
 await ana.locator('.bank-row').first().dragTo(ana.locator('section.col-todo'));
 await sleep(500);
 if ((await ana.locator('.col-todo .card').count()) <= before) throw new Error('arrastar do banco não funcionou');
+// e clica num cartão do banco e depois na coluna (sem arrastar)
+const n2 = await ana.locator('section.col-todo .card').count();
+await ana.locator('.bank-row .bank-t').first().click();
+await ana.click('section.col-todo h2');
+await sleep(500);
+if ((await ana.locator('section.col-todo .card').count()) <= n2) throw new Error('clicar no banco e na coluna não funcionou');
 
 // ---- dia 1 ----
 await prof.click('button:has-text("Começar o dia 1")', { timeout: 3000 }).catch(() => {});

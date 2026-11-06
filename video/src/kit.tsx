@@ -94,8 +94,12 @@ export const Sfx = ({ at, src, volume = 0.5 }: { at: number; src: 'whoosh' | 'mo
 );
 
 /** ponteiro do mouse que anda entre pontos e clica (com som e onda) */
-export function Cursor({ path, clicks = [] }: { path: Key[]; clicks?: number[] }) {
+export function Cursor({ path: rawPath, clicks = [] }: { path: Key[]; clicks?: number[] }) {
   const f = useCurrentFrame();
+  // os tempos vêm da narração: ordena e garante quadros crescentes, mesmo que duas marcas caiam juntas
+  const ks = [...rawPath].sort((x, y) => x[0] - y[0]);
+  const path = ks.map((k, i) => [Math.max(k[0], (ks[i - 1]?.[0] ?? -Infinity) + i), k[1], k[2], k[3]] as Key);
+  for (let i = 1; i < path.length; i++) if (path[i][0] <= path[i - 1][0]) path[i][0] = path[i - 1][0] + 1;
   if (!path.length || f < path[0][0]) return null;
   const fr = path.map((k) => k[0]);
   const x = interpolate(f, fr, path.map((k) => k[1]), { ...clamp, easing: Easing.bezier(0.65, 0, 0.35, 1) });
@@ -167,9 +171,9 @@ export function Tag({ a }: { a: Area }) {
 export type CardState = 'todo' | 'doing' | 'done' | 'locked' | 'blocked';
 export const CARD_W = 438, CARD_H = 214;
 /** cartão do quadro, igual ao do jogo (largura 438 px) */
-export function Card({ t, d, a, cost, spent = 0, owner, state = 'todo', mine, dep, btn, primary, help, press = 0, glow = 0, style }: {
+export function Card({ t, d, a, cost, spent = 0, owner, state = 'todo', mine, dep, btn, primary, help, note, press = 0, glow = 0, style }: {
   t: string; d?: string; a: Area; cost: number; spent?: number; owner?: string; state?: CardState; mine?: boolean; dep?: string;
-  btn?: string; primary?: boolean; help?: string; press?: number; glow?: number; style?: CSSProperties;
+  btn?: string; primary?: boolean; help?: string; note?: string; press?: number; glow?: number; style?: CSSProperties;
 }) {
   const done = state === 'done', locked = state === 'locked';
   const border = mine ? C.blue : state === 'blocked' ? '#f2d28d' : glow ? C.amber2 : 'transparent';
@@ -198,6 +202,7 @@ export function Card({ t, d, a, cost, spent = 0, owner, state = 'todo', mine, de
         {done ? <span style={{ display: 'flex', gap: 7, alignItems: 'center', font: `600 18px ${FONT}`, color: C.green }}><Icon n="check" size={20} />Pronto</span>
           : locked ? <span style={{ display: 'flex', gap: 7, alignItems: 'center', font: `600 17px ${FONT}`, color: C.ink3 }}><Icon n="lock" size={18} />Depois de: {dep}</span>
           : state === 'blocked' ? <span style={{ display: 'flex', gap: 7, alignItems: 'center', font: `600 17px ${FONT}`, color: C.amber }}><Icon n="clock" size={18} />Peça atrasada: volta amanhã</span>
+          : note ? <span style={{ font: `600 17px ${FONT}`, color: C.ink3 }}>{note}</span>
           : btn ? <span style={{ display: 'flex', gap: 7, alignItems: 'center', height: 44, padding: '0 18px', borderRadius: 12, font: `600 18px ${FONT}`, background: primary ? C.blue : C.surface, color: primary ? '#fff' : C.ink, border: `2px solid ${primary ? C.blue : C.line2}`, scale: 1 - press * 0.08 }}>
               {(btn.includes('Gastar') || btn.includes('Ajudar')) && <Icon n="zap" size={18} />}{btn}</span> : null}
       </div>
@@ -237,11 +242,11 @@ export const Panel = ({ children, style }: { children: ReactNode; style?: CSSPro
 );
 
 /** vinheta de imprevisto (laranja) ou boa notícia/entrega (verde), igual à do jogo */
-export function Vignette({ at, kicker, name, title, text, good, icon = 'alert' }: { at: number; kicker: string; name: string; title: string; text: string; good?: boolean; icon?: keyof typeof PATHS }) {
+export function Vignette({ at, kicker, name, title, text, good, icon = 'alert', len: secs = 3.4 }: { at: number; kicker: string; name: string; title: string; text: string; good?: boolean; icon?: keyof typeof PATHS; len?: number }) {
   const f = useCurrentFrame() - at;
   const { fps } = useVideoConfig();
   const sfx = <Sfx at={at} src="whoosh" volume={0.8} />;
-  const len = 3.4 * fps;
+  const len = secs * fps;
   if (f < 0 || f > len) return sfx;
   const band = good ? ['#15803d', '#22c55e'] : ['#b45309', '#f59e0b'];
   const x = interpolate(f, [0, 0.4 * fps, len - 0.45 * fps, len], [-110, 0, 0, 110], { ...clamp, easing: Easing.bezier(0.7, 0, 0.3, 1) });
@@ -267,13 +272,13 @@ export function Vignette({ at, kicker, name, title, text, good, icon = 'alert' }
 }
 
 /** aviso escuro no topo, como os do jogo */
-export function Toast({ at, text, len = 2.2 }: { at: number; text: string; len?: number }) {
+export function Toast({ at, text, len = 2.2, bg = C.red, fg = '#fff' }: { at: number; text: string; len?: number; bg?: string; fg?: string }) {
   const f = useCurrentFrame() - at;
   const { fps } = useVideoConfig();
   if (f < 0 || f > len * fps) return null;
   return (
     <div style={{ position: 'absolute', left: '50%', top: 40, translate: `-50% ${ease(f, [0, 10], [-30, 0])}px`, opacity: ease(f, [0, 8, len * fps - 8, len * fps], [0, 1, 1, 0]), zIndex: 75,
-      background: C.red, color: '#fff', font: `600 30px ${FONT}`, padding: '18px 34px', borderRadius: 18, boxShadow: SHADOW, whiteSpace: 'nowrap' }}>{text}</div>
+      background: bg, color: fg, font: `600 30px ${FONT}`, padding: '18px 34px', borderRadius: 18, boxShadow: SHADOW, whiteSpace: 'nowrap' }}>{text}</div>
   );
 }
 
