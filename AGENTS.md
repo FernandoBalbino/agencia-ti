@@ -6,6 +6,7 @@
 - Aluno recebe só a própria equipe (`team`); professor recebe o resumo (`teams`, `players`). Pela rede passam só ids de cartão: os textos ficam no site.
 - O Render tem limite de banda de 5 GB: teste tudo localmente (`npm test`, `npm run e2e`, `tests/bots.mjs`). No Render, só `/healthz`. Site, vídeo e slides ficam no GitHub Pages. Socket.IO só por WebSocket.
 - Commit que só muda o site, o vídeo ou os slides leva `[skip render]` na mensagem: assim o Render não refaz o build à toa.
+- Deploy do servidor (serviço `agencia-ti` no Render): se o push não disparar sozinho, dispare pelo painel do Render ou pela API ("Manual Deploy"). Depois rode `node tests/prod-check.mjs` (uma sala de teste, quase nada de banda).
 - Node 24 roda TypeScript direto (sem build no servidor): use só sintaxe apagável (sem enum, namespace ou parameter properties) e importe com `.ts`.
 - `AG_SPEED=12` acelera o relógio do servidor para testes (1 minuto vira 5 s).
 - Interface em português, textos curtos; animações só com `transform`/`opacity`, respeitando `prefers-reduced-motion`. Telas pensadas para Chromebook 1366×768 em tela cheia e para a TV.
