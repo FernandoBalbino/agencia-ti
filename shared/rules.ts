@@ -26,6 +26,21 @@ export function balance<T>(items: T[], k: number, rnd = Math.random): T[][] {
   return out;
 }
 
+/** embaralha sempre igual para a mesma semente: cada equipe vê uma ordem própria, que não muda a cada clique */
+export function seededShuffle<T>(items: T[], seed: string): T[] {
+  let h = 2166136261;
+  for (const ch of seed) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  const rnd = () => {
+    h = (h + 0x6d2b79f5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
 export type Cell = { col: Col; spent: number };
 /** cartão liberado = todos os cartões de que ele depende estão prontos */
 export const isOpen = (def: CardDef, cells: Map<string, Cell> | Record<string, Cell>) =>

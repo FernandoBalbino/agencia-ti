@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Room, Oops } from './game.ts';
 import type { P, T } from './game.ts';
-import { balance, splitEnergy, isOpen, PTS } from '../shared/rules.ts';
+import { balance, splitEnergy, isOpen, PTS, seededShuffle } from '../shared/rules.ts';
 import { clientById } from '../shared/clients.ts';
 import type { Fx } from '../shared/types.ts';
 
@@ -146,6 +146,17 @@ test('professor monta as equipes à mão (arrastar ou clicar) e ninguém fica de
   assert.ok([...r.players.values()].every((p) => p.team === 0 || p.team === 2));
   assert.equal(r.teams[1].members.length, 0, 'não cria equipe de uma pessoa só');
   assert.ok(Math.abs(r.teams[0].members.length - r.teams[2].members.length) <= 1);
+});
+
+test('ordem embaralhada: estável para a mesma semente e diferente entre equipes', () => {
+  const ids = clientById('papelaria').cards.map((d) => d.id);
+  const a = seededShuffle(ids, 'ABCD-1-0'), b = seededShuffle(ids, 'ABCD-1-0'), c = seededShuffle(ids, 'ABCD-1-1');
+  assert.deepEqual(a, b);
+  assert.notDeepEqual(a, c);
+  assert.deepEqual([...a].sort(), [...ids].sort());
+  // os cartões do pedido não ficam todos no começo
+  const firstNine = a.slice(0, 9).filter((id) => !clientById('papelaria').cards.find((d) => d.id === id)!.x).length;
+  assert.ok(firstNine < 9);
 });
 
 test('configurações ficam dentro dos limites', () => {

@@ -6,7 +6,7 @@ import type { St } from './net.ts';
 import { Bolts, Done, Face, Logo, leftOf, phaseLabel, tc, toast, useClock } from './ui.tsx';
 import { AREAS, cardOf, clientById } from '../shared/clients.ts';
 import type { CardDef } from '../shared/clients.ts';
-import { fmt, isOpen, splitEnergy } from '../shared/rules.ts';
+import { fmt, isOpen, seededShuffle, splitEnergy } from '../shared/rules.ts';
 import type { Col, TeamView } from '../shared/types.ts';
 import { sfx } from './sfx.ts';
 import { TeamCard } from './Reveal.tsx';
@@ -180,11 +180,17 @@ function Board({ v }: { v: St }) {
     : myE > 0 ? 'Gaste energia no seu cartão. Ele fica pronto quando a barra enche.'
     : 'Sua energia acabou hoje. Converse com a equipe e prepare o próximo dia.';
 
-  const bank = rows.filter((r) => r.col === 'bank').sort((a, b) => a.def.t.localeCompare(b.def.t, 'pt-BR'));
+  // ordem embaralhada por sala, rodada e equipe: os cartões do pedido não vêm sempre primeiro
+  const rank = new Map(seededShuffle(client.cards.map((d) => d.id), `${room.code}-${room.round}-${team.id}`).map((id, i) => [id, i]));
+  const rk = (r: Row) => rank.get(r.id) ?? -1; // o pedido extra aparece no topo
+  const bank = rows.filter((r) => r.col === 'bank').sort((a, b) => rk(a) - rk(b));
   const order = (c: Col) => rows.filter((r) => r.col === c).sort((a, b) => {
-    if (c === 'doing') return Number(b.owner === me) - Number(a.owner === me);
-    if (c === 'todo') return Number(isOpen(b.def, cells) && !b.blocked) - Number(isOpen(a.def, cells) && !a.blocked);
-    return 0;
+    if (c === 'doing' && (a.owner === me) !== (b.owner === me)) return Number(b.owner === me) - Number(a.owner === me);
+    if (c === 'todo') {
+      const oa = isOpen(a.def, cells) && !a.blocked, ob = isOpen(b.def, cells) && !b.blocked;
+      if (oa !== ob) return Number(ob) - Number(oa);
+    }
+    return rk(a) - rk(b);
   });
 
   return (
@@ -205,7 +211,7 @@ function Board({ v }: { v: St }) {
         </section>
         <section className={`side-bank ${armed('bank')} ${over === 'bank' ? 'over' : ''}`} {...zone('bank')}>
           <h3>Banco de cartões <span className="count">{bank.length}</span></h3>
-          <p className="muted small">Leve para A fazer só o que o cliente pediu: clique no +, arraste, ou clique no cartão e depois na coluna. Cartão fora do pedido tira 5 pontos.</p>
+          <p className="muted small">Leve para A fazer só o que o cliente pediu (+, arrastar ou clicar e escolher a coluna). Fora do pedido: −5.</p>
           <ul className="bank">
             {bank.map((r) => (
               <li key={r.id}>
