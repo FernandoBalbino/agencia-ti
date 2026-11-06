@@ -46,6 +46,8 @@ O `npm run voice` mede cada áudio e ajusta o tempo das cenas sozinho. Se existi
 
 Sem áudio, o vídeo ainda funciona: cada cena dura o tempo estimado da fala.
 
+Na versão atual, as cenas 1 a 6 foram sincronizadas pela transcrição e as cenas 7 a 11 pelo tamanho do texto (a conta da chave ficou sem créditos no meio). A diferença medida foi de 0,27 s em média.
+
 ## Sons
 
 Clique do mouse, whoosh, ding e switch: biblioteca de sons do Remotion (remotion.media), os mesmos do CYBER WAR. Ficam em `video/public/sfx/`.

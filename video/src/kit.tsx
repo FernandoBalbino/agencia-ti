@@ -137,7 +137,7 @@ export function Points({ p, text, color = C.green, x, y, size = 96 }: { p: numbe
 }
 
 /** confete guiado pelo quadro */
-export function Confetti({ at, n = 120 }: { at: number; n?: number }) {
+export function Confetti({ at, n = 120, x0 = 960, y0 = 300 }: { at: number; n?: number; x0?: number; y0?: number }) {
   const f = useCurrentFrame() - at;
   if (f < 0 || f > 150) return null;
   const cols = Object.values(TEAM).concat(C.amber2);
@@ -145,7 +145,7 @@ export function Confetti({ at, n = 120 }: { at: number; n?: number }) {
     <AbsoluteFill style={{ pointerEvents: 'none', zIndex: 70 }}>
       {Array.from({ length: n }, (_, i) => {
         const vx = (random(`vx${i}`) - 0.5) * 34, vy = -random(`vy${i}`) * 34 - 10;
-        const x = 960 + vx * f, y = 520 + vy * f + 0.7 * f * f;
+        const x = x0 + vx * f, y = y0 + vy * f + 0.7 * f * f;
         return <div key={i} style={{ position: 'absolute', left: x, top: y, width: 16, height: 9, background: cols[i % cols.length], rotate: `${f * (random(`r${i}`) * 20 - 10)}deg`, opacity: ease(f, [110, 150], [1, 0]) }} />;
       })}
     </AbsoluteFill>
@@ -247,9 +247,10 @@ export function Vignette({ at, kicker, name, title, text, good, icon = 'alert', 
   const { fps } = useVideoConfig();
   const sfx = <Sfx at={at} src="whoosh" volume={0.8} />;
   const len = secs * fps;
+  const k = Math.min(1, secs / 3.4); // vinheta curta: tudo entra mais rápido para dar tempo de ler
   if (f < 0 || f > len) return sfx;
   const band = good ? ['#15803d', '#22c55e'] : ['#b45309', '#f59e0b'];
-  const x = interpolate(f, [0, 0.4 * fps, len - 0.45 * fps, len], [-110, 0, 0, 110], { ...clamp, easing: Easing.bezier(0.7, 0, 0.3, 1) });
+  const x = interpolate(f, [0, 0.4 * fps * k, len - 0.45 * fps * k, len], [-110, 0, 0, 110], { ...clamp, easing: Easing.bezier(0.7, 0, 0.3, 1) });
   return (
     <AbsoluteFill style={{ zIndex: 80, display: 'grid', placeItems: 'center', overflow: 'hidden', fontFamily: FONT }}>
       {sfx}
@@ -258,14 +259,14 @@ export function Vignette({ at, kicker, name, title, text, good, icon = 'alert', 
         background: `repeating-linear-gradient(-45deg, rgba(255,255,255,.12) 0 26px, transparent 26px 52px), linear-gradient(90deg, ${band[0]}, ${band[1]} 30%, ${band[1]} 70%, ${band[0]})`,
         backgroundPositionX: `${f * 5}px, 0`, boxShadow: '0 0 0 6px rgba(255,255,255,.9), 0 40px 100px rgba(20,26,46,.35)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 44 }}>
-          <div style={{ width: 170, height: 170, borderRadius: 40, background: '#fff', display: 'grid', placeItems: 'center', color: band[0], scale: ease(f, [6, 20], [0, 1], Easing.back(2)), rotate: `${ease(f, [6, 20], [-160, 0])}deg` }}><Icon n={icon} size={96} /></div>
+          <div style={{ width: 170, height: 170, borderRadius: 40, background: '#fff', display: 'grid', placeItems: 'center', color: band[0], scale: ease(f, [6 * k, 20 * k], [0, 1], Easing.back(2)), rotate: `${ease(f, [6 * k, 20 * k], [-160, 0])}deg` }}><Icon n={icon} size={96} /></div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 0.95 }}>
             <div style={{ font: `700 30px ${FONT}`, letterSpacing: '0.4em', color: 'rgba(255,255,255,.9)', textTransform: 'uppercase' }}>{kicker}</div>
             <div style={{ font: `800 150px/0.95 ${FONT}`, color: '#fff', letterSpacing: '-0.03em' }}>{name}</div>
-            <div style={{ marginTop: 12, font: `800 66px/1 ${FONT}`, letterSpacing: '0.05em', textTransform: 'uppercase', color: band[0], background: '#fff', padding: '8px 26px', borderRadius: 16, scale: ease(f, [14, 26], [2.2, 1]), opacity: ease(f, [14, 20], [0, 1]) }}>{title}</div>
+            <div style={{ marginTop: 12, font: `800 66px/1 ${FONT}`, letterSpacing: '0.05em', textTransform: 'uppercase', color: band[0], background: '#fff', padding: '8px 26px', borderRadius: 16, scale: ease(f, [14 * k, 26 * k], [2.2, 1]), opacity: ease(f, [14 * k, 20 * k], [0, 1]) }}>{title}</div>
           </div>
         </div>
-        <div style={{ font: `600 40px ${FONT}`, color: '#fff', opacity: ease(f, [20, 30], [0, 1]), maxWidth: 1500, textAlign: 'center' }}>{text}</div>
+        <div style={{ font: `600 40px ${FONT}`, color: '#fff', opacity: ease(f, [20 * k, 30 * k], [0, 1]), maxWidth: 1500, textAlign: 'center' }}>{text}</div>
       </div>
     </AbsoluteFill>
   );

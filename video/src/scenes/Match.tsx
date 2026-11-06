@@ -83,7 +83,7 @@ export function S9() {
           </div>
         </AbsoluteFill>
       )}
-      <Vignette at={at('bruno', -0.1)} kicker="imprevisto" name="Equipe Pixel" title="Integrante faltou" text="Bruno faltou hoje e ficou sem energia." icon="userx" len={1.4} />
+      <Vignette at={at('bruno', -0.1)} kicker="imprevisto" name="Equipe Pixel" title="Integrante faltou" text="Bruno faltou hoje e ficou sem energia." icon="userx" len={1.8} />
       <Vignette at={at('delivered', -0.1)} kicker="pedido concluído" name="Equipe Pixel" title="Entregue" text="Pedido entregue no dia 3!" good icon="package" len={1.9} />
       <Confetti at={at('delivered', 0.3)} />
       <Sfx at={spend} src="switch" volume={0.5} /><Sfx at={spend + 12} src="ding" volume={0.5} />

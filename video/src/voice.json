@@ -1,1 +1,152 @@
-{}
+{
+  "s1": {
+    "file": "voice/s1.mp3",
+    "duration": 12.434,
+    "cues": {
+      "title": 2.1,
+      "team": 3.92,
+      "clients": 6.8,
+      "plan": 9.02,
+      "split": 9.8,
+      "deadline": 11.94
+    }
+  },
+  "s2": {
+    "file": "voice/s2.mp3",
+    "duration": 12.748,
+    "cues": {
+      "code": 2.64,
+      "name": 4.84,
+      "full": 5.8,
+      "teams": 7.58,
+      "sit": 8.84,
+      "talk": 11.5
+    }
+  },
+  "s3": {
+    "file": "voice/s3.mp3",
+    "duration": 10.919,
+    "cues": {
+      "client": 0.08,
+      "read": 2.08,
+      "rosa": 4.019,
+      "pc": 5.62,
+      "wifi": 7.46,
+      "av": 8.68,
+      "sheet": 9.68
+    }
+  },
+  "s4": {
+    "file": "voice/s4.mp3",
+    "duration": 20.689,
+    "cues": {
+      "plan": 0.86,
+      "bank": 2.94,
+      "todo": 4.66,
+      "drag": 7.74,
+      "clickcol": 9.04,
+      "trap": 12.06,
+      "game": 13.04,
+      "no": 16.86,
+      "minus": 19.7
+    }
+  },
+  "s5": {
+    "file": "voice/s5.mp3",
+    "duration": 19.069,
+    "cues": {
+      "energy": 0.88,
+      "bolts": 3.5,
+      "cost": 7.1,
+      "take": 10.4,
+      "drag": 11.18,
+      "doing": 13.02,
+      "spend": 14.5,
+      "full": 16.6,
+      "done": 18.48
+    }
+  },
+  "s6": {
+    "file": "voice/s6.mp3",
+    "duration": 13.793,
+    "cues": {
+      "rules": 0.52,
+      "one": 3.16,
+      "lock": 5.5,
+      "internet": 7.46,
+      "wifi": 9.02,
+      "open": 12.84
+    }
+  },
+  "s7": {
+    "file": "voice/s7.mp3",
+    "duration": 18.364,
+    "cues": {
+      "empty": 0,
+      "help": 5.108,
+      "mate": 8.087,
+      "stuck": 8.574,
+      "ask": 10.398,
+      "blink": 12.101,
+      "idea": 15.628,
+      "talk": 16.783
+    }
+  },
+  "s8": {
+    "file": "voice/s8.mp3",
+    "duration": 17.711,
+    "cues": {
+      "imp": 1.19,
+      "absent": 2.71,
+      "late": 3.767,
+      "crash": 4.758,
+      "power": 5.948,
+      "extra": 7.93,
+      "good": 10.574,
+      "coffee": 12.556,
+      "replan": 16.521
+    }
+  },
+  "s9": {
+    "file": "voice/s9.mp3",
+    "duration": 20.271,
+    "cues": {
+      "go": 1.502,
+      "cards": 3.686,
+      "ana": 5.801,
+      "spend": 7.303,
+      "unlock": 9.009,
+      "bruno": 11.535,
+      "carla": 12.968,
+      "day3": 16.381,
+      "last": 17.2,
+      "delivered": 19.179
+    }
+  },
+  "s10": {
+    "file": "voice/s10.mp3",
+    "duration": 14.211,
+    "cues": {
+      "ten": 1.557,
+      "twenty": 4.218,
+      "bonus": 6.359,
+      "minus": 8.371,
+      "reveal": 10.901,
+      "one": 12.069,
+      "champ": 13.756
+    }
+  },
+  "s11": {
+    "file": "voice/s11.mp3",
+    "duration": 11.964,
+    "cues": {
+      "read": 0.779,
+      "plan": 1.911,
+      "split": 2.619,
+      "talk": 4.106,
+      "real": 7.079,
+      "ready": 8.566,
+      "open": 11.469
+    }
+  }
+}
